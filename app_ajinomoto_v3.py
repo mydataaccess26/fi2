@@ -12,6 +12,18 @@ import plotly.graph_objects as go
 import os
 import sys
 
+# ── Password dari environment variable (aman, tidak hardcoded) ───────────────
+# Di lokal: set di file .streamlit/secrets.toml
+# Di Streamlit Cloud: set di Settings → Secrets
+def get_password():
+    # Coba baca dari Streamlit secrets dulu (Streamlit Cloud)
+    try:
+        return st.secrets["PASSWORD"]
+    except Exception:
+        pass
+    # Fallback: baca dari environment variable
+    return os.getenv("PASSWORD", "changeme")
+
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) if '__file__' in dir() else '.')
 
 st.set_page_config(
@@ -176,7 +188,7 @@ def login_page():
         </div>""", unsafe_allow_html=True)
         password = st.text_input("Password", type="password", placeholder="Masukkan password...")
         if st.button("🔐  Login", use_container_width=True):
-            if password == "1":
+            if password == get_password():
                 st.session_state["logged_in"] = True
                 st.rerun()
             else:
