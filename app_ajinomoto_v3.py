@@ -9,9 +9,9 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-import subprocess
 import os
 import sys
+import subprocess
 
 # ── Password dari environment variable (aman, tidak hardcoded) ───────────────
 # Di lokal: set di file .streamlit/secrets.toml
@@ -1612,6 +1612,19 @@ def main():
 
     if all(v.empty for v in data.values()):
         st.error("❌ Data belum ada. Jalankan pipeline atau gunakan tab Data Entry untuk input manual.")
+        if st.button("▶️  Run Pipeline", key="btn_run_pipeline"):
+            with st.spinner("⏳ Menjalankan pipeline_excel_to_csv.py ..."):
+                result = subprocess.run(
+                    ["python", "pipeline_excel_to_csv.py"],
+                    capture_output=True,
+                    text=True
+                )
+            if result.returncode == 0:
+                st.success("✅ Pipeline berhasil dijalankan. Silakan refresh dashboard.")
+                st.cache_data.clear()
+                st.rerun()
+            else:
+                st.error(f"❌ Pipeline gagal:\n```\n{result.stderr}\n```")
         return
 
     render_header(data)
